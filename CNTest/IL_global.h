@@ -16,8 +16,8 @@
 
 #include <QVector>
 
-#include "IL_net_UDPServer.h"
-#include "IL_net_UDTServer.h"
+//#include "IL_net_UDPServer.h"
+//#include "IL_net_UDTServer.h"
 
 #define SENDING_SIGNAL 58
 
@@ -25,6 +25,12 @@
 #include <mutex>
 #include <map>
 #include <memory>
+
+//#include "udp_async_server.h"
+//#include "udt_sync_server.h"
+//#include "udt_sync_client.h"
+#include "socketpp.h"
+
 
 using namespace std;
 
@@ -47,9 +53,13 @@ class ggNet
 {
 public:
     static boost::asio::io_service io_service;
-    static UDPServer vx_Net;
+    //static UDPServer vx_Net;
+    static socketpp::udp::async_server vx_Net;
 
-    static UDTServer udt_Net;
+    //static UDTServer udt_Net;
+    //static socketpp::udt::sync_server udt_Net;
+    static socketpp::udt::sync_client udt_Net;
+    //static socketpp::udp::async_server
 };
 
 namespace TestNamespace {

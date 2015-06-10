@@ -17,16 +17,23 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 
+//#include "udp_async_server.h"
+//#include "udt_sync_client.h"
+#include "socketpp.h"
+
 namespace TestNamespace {
     int variable_int;
 }
 
-UDTServer ggNet::udt_Net;
-
+//UDTServer ggNet::udt_Net;
+//socketpp::udt::sync_server ggNet::udt_Net;
+socketpp::udt::sync_client ggNet::udt_Net;
 
 boost::asio::io_service ggNet::io_service;
-UDPServer ggNet::vx_Net(ggNet::io_service);
 
+//UDPServer ggNet::vx_Net(ggNet::io_service);
+
+socketpp::udp::async_server ggNet::vx_Net(ggNet::io_service);
 
 timespec timeout(time_t wait_seconds)
 {

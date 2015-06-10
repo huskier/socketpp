@@ -26,22 +26,27 @@ LIBS   += -L/usr/local/lib -lboost_system
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    IL_net_UDPServer.cpp \
     IL_VA.cpp \
     util.cpp \
     IL_global.cpp \
-    IL_net_UDTServer.cpp \
-    IL_PICamera_over_UDT.cpp
+    IL_PICamera_over_UDT.cpp \
+    udp_async_server.cpp \
+    udp_async_client.cpp \
+    udt_sync_server.cpp \
+    udt_sync_client.cpp
 
 HEADERS  += mainwindow.h \
-    IL_net_UDPServer.h \
     IL_VA.h \
     IL_types.h \
     util.h \
     IL_global.h \
-    IL_net_UDTServer.h \
     IL_net_struct.h \
     IL_PICamera_over_UDT.h \
-    IL_PICamera.h
+    IL_PICamera.h \
+    udp_async_server.h \
+    udp_async_client.h \
+    udt_sync_server.h \
+    udt_sync_client.h \
+    socketpp.h
 
 FORMS    += mainwindow.ui
