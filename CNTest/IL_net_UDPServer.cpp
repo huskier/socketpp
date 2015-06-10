@@ -65,6 +65,8 @@ void UDPServer::handle_sending_signal(const boost::system::error_code &error, in
 {
     //LOG(INFO)<<"IN handle sending signal......";
 
+    //std::unique_lock<std::mutex> lck(send_packet_mutex);   //not needed....
+
     if(!send_queue.empty())
     {
         send_packet = send_queue.top();    //取最高优先级的队列元素。。。。。。
@@ -88,6 +90,8 @@ void UDPServer::handle_sending_signal(const boost::system::error_code &error, in
 
 void UDPServer::handle_send_head(boost::shared_ptr<string> msg, const boost::system::error_code & error, size_t bytes_sent)
 {
+    //std::unique_lock<std::mutex> lck(send_packet_mutex);   //not needed....
+
     if(!error)
     {
         //LOG(INFO)<<"IN handle_send_head......sent head data bytes : "<<bytes_sent;
@@ -145,12 +149,12 @@ void UDPServer::receive()
 void UDPServer::handle_receive_head(const boost::system::error_code & error,
                                     std::size_t bytes_received /*bytes_transferred*/)
 {
+    //LOG(INFO)<<"[*********]Before std::unique_lock<std::mutex> lck(cmd_finished_mtx); IN handle_receive_head......";
+    std::unique_lock<std::mutex> lck(recv_packet_mutex);
+    //LOG(INFO)<<"[*********]After std::unique_lock<std::mutex> lck(cmd_finished_mtx); IN handle_receive_head......";
+
     if(!error)
     {
-        //LOG(INFO)<<"[*********]Before std::unique_lock<std::mutex> lck(cmd_finished_mtx); IN handle_receive_head......";
-        std::unique_lock<std::mutex> lck(cmd_finished_mtx);
-        //LOG(INFO)<<"[*********]After std::unique_lock<std::mutex> lck(cmd_finished_mtx); IN handle_receive_head......";
-
         //LOG(INFO)<<"IN handle_receive_head......";
 
         memset(&recv_packet.head_union.head, 0, sizeof(recv_packet.head_union.head));
@@ -192,13 +196,12 @@ void UDPServer::handle_receive_head(const boost::system::error_code & error,
 void UDPServer::handle_receive_data(const boost::system::error_code & error,
                                     std::size_t bytes_received/*bytes_transferred*/)
 {
+    //LOG(INFO)<<"before std::unique_lock<std::mutex> lck(cmd_finished_mtx); IN handle_receive_data......";
+    std::unique_lock<std::mutex> lck(recv_packet_mutex);
+    //LOG(INFO)<<"after std::unique_lock<std::mutex> lck(cmd_finished_mtx); IN handle_receive_data......";
+
     if(!error)
     {
-        //LOG(INFO)<<"before std::unique_lock<std::mutex> lck(cmd_finished_mtx); IN handle_receive_data......";
-        std::unique_lock<std::mutex> lck(cmd_finished_mtx);
-        //LOG(INFO)<<"after std::unique_lock<std::mutex> lck(cmd_finished_mtx); IN handle_receive_data......";
-
-
         //LOG(INFO)<<"IN handle_receive_data...... received byters = "<<bytes_received;
 
         ushort data_len = recv_packet.head_union.head.total_length - NET_PACKET_HEAD_LEN;
@@ -239,7 +242,7 @@ STATUS UDPServer::wait_data(const int cmd, const time_t wait_seconds, NET_PACKET
 {
     try
     {
-        std::unique_lock<std::mutex> lck(cmd_finished_mtx);
+        std::unique_lock<std::mutex> lck(recv_packet_mutex);
 
         //LOG(INFO)<<"IN the beginning of UDPServer::wait_data... cmd = "<<int2hex(cmd);
 

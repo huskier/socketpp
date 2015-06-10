@@ -70,6 +70,10 @@ private:
     udp::socket socket_;
     udp::endpoint dest_endpoint;
     udp::endpoint sender_endpoint;
+    
+//  udp::endpoint remote_endpoint
+//  if we want to deal with multiple client, we need to add a from_endpoint variable in NET_PACKET_STRUCT struct,
+//  OR we need  other means to deal with this issue......
 
     static const int BUFF_SIZE = 1024;
     std::array<char,BUFF_SIZE> recv_buf;
@@ -77,11 +81,13 @@ private:
 
     NET_PACKET_STRUCT recv_packet;
     NET_PACKET_STRUCT send_packet;
+
+    std::mutex recv_packet_mutex;
+
     priority_queue<NET_PACKET_STRUCT, vector<NET_PACKET_STRUCT>, compare_NET_PACKET_STRUCT> send_queue;
 
     boost::asio::signal_set sending_signal;
 
-    std::mutex cmd_finished_mtx;
     std::map<ushort,std::unique_ptr<condition_variable> > cmd_finished_cond_map;
 
 private:
