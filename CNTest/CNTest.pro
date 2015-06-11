@@ -33,7 +33,9 @@ SOURCES += main.cpp\
     udp_async_server.cpp \
     udp_async_client.cpp \
     udt_sync_server.cpp \
-    udt_sync_client.cpp
+    udt_sync_client.cpp \
+    tcp_async_server.cpp \
+    tcp_async_client.cpp
 
 HEADERS  += mainwindow.h \
     IL_VA.h \
@@ -47,6 +49,8 @@ HEADERS  += mainwindow.h \
     udp_async_client.h \
     udt_sync_server.h \
     udt_sync_client.h \
-    socketpp.h
+    socketpp.h \
+    tcp_async_server.h \
+    tcp_async_client.h
 
 FORMS    += mainwindow.ui

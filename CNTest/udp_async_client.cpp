@@ -32,7 +32,6 @@ namespace udp{
                     boost::asio::ip::address::from_string("192.168.14.124"), 2001);
 
         sending_signal.add(SENDING_SIGNAL);
-
     }
 
     void async_client::set_dest_ip_port(std::string ip_addr, unsigned short port_num)

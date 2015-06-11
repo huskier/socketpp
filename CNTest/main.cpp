@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 
     std::cout<<"ggNet::io_service is_move_constructible :"<<std::is_move_constructible<boost::asio::io_service>::value<<std::endl;
 
-    ggNet::vx_Net.set_dest_ip_port("192.168.14.124",2001);
+    //ggNet::vx_Net.set_dest_ip_port("192.168.14.124",2001);
     ggNet::vx_Net.start_send_recv_thread();
 
     ggNet::udt_Net.set_dest_ip_port("192.168.14.124",4567);

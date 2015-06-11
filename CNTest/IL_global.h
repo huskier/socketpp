@@ -19,7 +19,7 @@
 //#include "IL_net_UDPServer.h"
 //#include "IL_net_UDTServer.h"
 
-#define SENDING_SIGNAL 58
+//#define SENDING_SIGNAL 58
 
 #include <condition_variable>
 #include <mutex>

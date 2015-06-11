@@ -69,7 +69,9 @@ STATUS VA::initialize()
     ggNet::vx_Net.pack_post(net_pack);
 
     memset(&net_pack, 0, sizeof(NET_PACKET_STRUCT));
-    int status = ggNet::vx_Net.wait_data(gCMD::VA_INIT, wait_seconds, net_pack);
+    //int status = ggNet::vx_Net.wait_data(gCMD::VA_INIT, wait_seconds, net_pack);
+
+    int status = OK;
 
 
     if(status != OK)
@@ -250,8 +252,9 @@ STATUS VA::set_angle(float angle)//单位是度
     memset(&net_pack, 0, sizeof(NET_PACKET_STRUCT));
     //waiting data from net......
     //int status = vx_Net.wait_data_from_net(gCMD::VA_SET_ANGLE, wait_seconds, net_pack);
-    int status = ggNet::vx_Net.wait_data(gCMD::VA_SET_ANGLE, wait_seconds, net_pack);
+    //int status = ggNet::vx_Net.wait_data(gCMD::VA_SET_ANGLE, wait_seconds, net_pack);
 
+    int status = OK;
 
     if(status != OK)
     {

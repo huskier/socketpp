@@ -12,7 +12,7 @@
 #include <array>
 #include <boost/shared_ptr.hpp>
 #include <queue>
-#include <semaphore.h>
+//#include <semaphore.h>
 #include <thread>
 
 #include <condition_variable>
