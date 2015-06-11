@@ -1,0 +1,4 @@
+
+20150611
+1. remove wait_data from socketpp::udp::async_server class
+2. remove dest_endpoint and send_endpoint, and replaced with remote_endpoint
