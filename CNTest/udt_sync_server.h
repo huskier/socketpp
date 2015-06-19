@@ -23,9 +23,11 @@ namespace socketpp{
             sync_server();
 
         public:
-            void set_dest_ip_port(std::string ip_addr, unsigned short port_num);
+            //void set_dest_ip_port(std::string ip_addr, unsigned short port_num);
 
-            void connect();
+            //void connect();
+
+            void create_connection();
 
             void start_send_recv_thread();
 
@@ -35,7 +37,7 @@ namespace socketpp{
             void pack_post(UDT_PACKET_STRUCT udt_pack);
 
 
-            STATUS wait_data(const int cmd, const time_t wait_seconds, UDT_PACKET_STRUCT & udt_pack, int cnt = 0);
+            //STATUS wait_data(const int cmd, const time_t wait_seconds, UDT_PACKET_STRUCT & udt_pack, int cnt = 0);
             //Maybe we can add a async_wait_data fuction into the class......
 
         private:
@@ -47,9 +49,11 @@ namespace socketpp{
             UDTSOCKET socketfd;
             struct sockaddr_in dest_sockaddr;
 
+            UDTSOCKET recver;
+
             std::condition_variable sending_cv;
 
-            std::thread *sending_thread, *recving_thread;
+            std::thread *sending_thread, *recving_thread, *create_connection_thread;
 
             std::mutex sending_mutex;
 

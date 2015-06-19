@@ -11,7 +11,11 @@
 #include <functional>
 #include <type_traits>
 
+#include "socketpp.h"
+
 using namespace vips;
+
+socketpp::udt::sync_server udt_server;
 
 int main(int argc, char *argv[])
 {
@@ -35,9 +39,14 @@ int main(int argc, char *argv[])
     //ggNet::vx_Net.set_dest_ip_port("192.168.14.124",2001);
     ggNet::vx_Net.start_send_recv_thread();
 
-    ggNet::udt_Net.set_dest_ip_port("192.168.14.124",4567);
-    ggNet::udt_Net.connect();
-    ggNet::udt_Net.start_send_recv_thread();
+    //ggNet::udt_Net.set_dest_ip_port("192.168.14.124",4567);
+    //ggNet::udt_Net.connect();
+    //ggNet::udt_Net.start_send_recv_thread();
+
+    //udt_server.create_connection();
+    //udt_server.start_send_recv_thread();
+
+    std::thread * udt_server_thread = new std::thread(&socketpp::udt::sync_server::create_connection, &udt_server);
 
 
     QApplication a(argc, argv);

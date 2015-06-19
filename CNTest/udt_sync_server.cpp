@@ -7,6 +7,18 @@
 
 #include "util.h"
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+
+#include <iostream>
+
+
+void parse(UDT_PACKET_STRUCT udt_pack)
+{
+    LOG(INFO)<<"Entering void parse(UDT_PACKET_STRUCT udt_pack) function......";
+}
+
 namespace socketpp{
     namespace udt{
 
@@ -20,7 +32,7 @@ namespace socketpp{
                     cmd_finished_cond_map[i] = std::move(cv_ptr);
                 }
         }
-
+/*
         void sync_server::set_dest_ip_port(std::string ip_addr, unsigned short port_num)
         {
             dest_sockaddr.sin_family = PF_INET;
@@ -52,11 +64,76 @@ namespace socketpp{
                 LOG(INFO)<<"Connect successful......!";
             }
         }
+*/
+        void sync_server::create_connection()
+        {
+            addrinfo hints;
+            addrinfo* res;
+
+            memset(&hints, 0, sizeof(struct addrinfo));
+
+            hints.ai_flags = AI_PASSIVE;
+            hints.ai_family = PF_INET;
+            hints.ai_socktype = SOCK_STREAM;
+
+            string service("9000");
+
+            service = "4567";
+
+            if (0 != getaddrinfo(NULL, service.c_str(), &hints, &res))
+            {
+               std::cout << "illegal port number or port is busy.\n" << std::endl;
+               return ;
+            }
+
+            UDTSOCKET serv = UDT::socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+
+
+            if (UDT::ERROR == UDT::bind(serv, res->ai_addr, res->ai_addrlen))
+            {
+               std::cout << "bind: " << UDT::getlasterror().getErrorMessage() << std::endl;
+               return;
+            }
+
+            freeaddrinfo(res);
+
+            LOG(INFO) << "server is ready at port: " << service << endl;
+
+            if (UDT::ERROR == UDT::listen(serv, 10))
+            {
+               std::cout << "listen: " << UDT::getlasterror().getErrorMessage() << std::endl;
+               return ;
+            }
+
+            sockaddr_storage clientaddr;
+            int addrlen = sizeof(clientaddr);
+
+            if (UDT::INVALID_SOCK == (recver = UDT::accept(serv, (sockaddr*)&clientaddr, &addrlen)))
+            {
+                 std::cout << "accept: " << UDT::getlasterror().getErrorMessage() << std::endl;
+                 return;
+            }
+
+            LOG(INFO) << "accept: " << UDT::getlasterror().getErrorMessage();
+
+            LOG(INFO)<<"recver is : "<<recver;
+            LOG(INFO)<<"UDT::INVALID_SOCK is :"<<UDT::INVALID_SOCK;
+
+            char clienthost[NI_MAXHOST];
+            char clientservice[NI_MAXSERV];
+            getnameinfo((sockaddr *)&clientaddr, addrlen, clienthost, sizeof(clienthost), clientservice, sizeof(clientservice), NI_NUMERICHOST|NI_NUMERICSERV);
+            LOG(INFO) << "new connection: " << clienthost << ":" << clientservice << endl;
+
+            sending_thread = new std::thread(std::mem_fn(&sync_server::send),this);
+            recving_thread = new std::thread(std::mem_fn(&sync_server::receive),this);
+
+        }
 
         void sync_server::start_send_recv_thread()
         {
-            sending_thread = new std::thread(std::mem_fn(&sync_server::send),this);
-            recving_thread = new std::thread(std::mem_fn(&sync_server::receive),this);
+            //create_connection_thread = new std::thread(std::mem_fn(&sync_server::create_connection), this);
+            //sending_thread = new std::thread(std::mem_fn(&sync_server::send),this);
+            //recving_thread = new std::thread(std::mem_fn(&sync_server::receive),this);
         }
 
         void sync_server::stop_send_recv_thread()
@@ -84,12 +161,12 @@ namespace socketpp{
 
         void sync_server::pack_post(UDT_PACKET_STRUCT udt_pack)
         {
-            udt_pack.head_union.head.cmd = htons(udt_pack.head_union.head.cmd);
-            udt_pack.head_union.head.total_length = htons(udt_pack.head_union.head.total_length);
-            udt_pack.head_union.head.cnt = htons(udt_pack.head_union.head.cnt);
-            udt_pack.head_union.head.check = htons(udt_pack.head_union.head.check);
-            udt_pack.head_union.head.priority = htons(udt_pack.head_union.head.priority);
-            udt_pack.head_union.head.status = htons(udt_pack.head_union.head.status);
+            udt_pack.head_union.head.cmd = htonl(udt_pack.head_union.head.cmd);
+            udt_pack.head_union.head.total_length = htonl(udt_pack.head_union.head.total_length);
+            udt_pack.head_union.head.cnt = htonl(udt_pack.head_union.head.cnt);
+            udt_pack.head_union.head.check = htonl(udt_pack.head_union.head.check);
+            udt_pack.head_union.head.priority = htonl(udt_pack.head_union.head.priority);
+            udt_pack.head_union.head.status = htonl(udt_pack.head_union.head.status);
 
             send_queue.push(udt_pack);
 
@@ -128,7 +205,7 @@ namespace socketpp{
                     ssize = 0;
                     while (ssize < packet_size)
                     {
-                      if (UDT::ERROR == (ss = UDT::send(socketfd, send_buf + ssize, packet_size - ssize, 0)))
+                      if (UDT::ERROR == (ss = UDT::send(recver, send_buf + ssize, packet_size - ssize, 0)))
                       {
                         LOG(INFO) << "send:" << UDT::getlasterror().getErrorMessage() << endl;
                         break;
@@ -162,7 +239,7 @@ namespace socketpp{
                         ssize = 0;
                         while (ssize < packet_size)
                         {
-                          if (UDT::ERROR == (ss = UDT::send(socketfd, send_buf + sizeof(UDT_PACKET_HEAD_STRUCT) + ssize, packet_size - ssize, 0)))
+                          if (UDT::ERROR == (ss = UDT::send(recver, send_buf + sizeof(UDT_PACKET_HEAD_STRUCT) + ssize, packet_size - ssize, 0)))
                           {
                             LOG(INFO) << "send:" << UDT::getlasterror().getErrorMessage() << endl;
                             break;
@@ -207,7 +284,7 @@ namespace socketpp{
                     {
                        try
                        {
-                           if (UDT::ERROR == (rs = UDT::recv(socketfd, recv_buf + rsize, packet_size - rsize, 0)))
+                           if (UDT::ERROR == (rs = UDT::recv(recver, recv_buf + rsize, packet_size - rsize, 0)))
                            {
                               LOG(INFO) << "recv:" << UDT::getlasterror().getErrorMessage();
                               break;
@@ -263,7 +340,7 @@ namespace socketpp{
                            //int rcv_size;
                            //int var_size = sizeof(int);
                            //UDT::getsockopt(recver, 0, UDT_RCVDATA, &rcv_size, &var_size);
-                           if (UDT::ERROR == (rs = UDT::recv(socketfd, recv_buf + rsize, packet_size - rsize, 0)))
+                           if (UDT::ERROR == (rs = UDT::recv(recver, recv_buf + rsize, packet_size - rsize, 0)))
                            {
                               LOG(INFO) << "recv:" << UDT::getlasterror().getErrorMessage();
                               break;
@@ -308,11 +385,13 @@ namespace socketpp{
                     //pthread_cond_broadcast(gVar::cmd_finished_cond_QMap[recv_packet.head_union.head.cmd]);
                     //LOG(INFO) << "After pthread_cond_broadcast ...... ";
 
-                    (*cmd_finished_cond_map[recv_packet.head_union.head.cmd]).notify_one();
+                    //(*cmd_finished_cond_map[recv_packet.head_union.head.cmd]).notify_one();
+                    parse(recv_packet);
 
                 }
         }
 
+        /*
         STATUS sync_server::wait_data(const int cmd, const time_t wait_seconds, UDT_PACKET_STRUCT & udt_pack, int cnt)
         {
             std::unique_lock<std::mutex> lck(cmd_finished_mtx);
@@ -354,6 +433,7 @@ namespace socketpp{
 
             return OK;
         }
+        */
 
     } //namespace udt
 } //namespace socketpp
